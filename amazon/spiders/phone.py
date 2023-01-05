@@ -16,10 +16,6 @@ class PhoneSpider(scrapy.Spider):
                                 'brand', 'model_name', 'operating_system',\
                                 'cellular_technology', 'wireless_network_technology', 'about']
         }
-    DOWNLOADER_MIDDLEWARES = {
-        'scrapy.contrib.downloadermiddleware.httpproxy.HttpProxyMiddleware': 1,
-        'custom_middleware.CustomMiddleware': 200,
-        }
 
     def __init__(self, name=None, **kwargs):
         super().__init__(name, **kwargs)
@@ -40,27 +36,33 @@ class PhoneSpider(scrapy.Spider):
     def parse_product(self, response):
         link = response.url
         title = response.xpath("//span[@id='productTitle']/text()").get().strip()
-        price = response.xpath("//span[@class='a-price aok-align-center reinventPricePriceToPayMargin priceToPay']/span/text()").get()
-        rating = response.xpath("//i[contains(@class,'a-icon a-icon-star')]/span/text()").get().split(' ')[0]
-        brand = response.xpath("//table[@class='a-normal a-spacing-micro']/tr[@class='a-spacing-small po-brand']/td[@class='a-span9']/span/text()").get()
-        model_name = response.xpath("//table[@class='a-normal a-spacing-micro']/tr[@class='a-spacing-small po-model_name']/td[@class='a-span9']/span/text()").get()
-        operating_system = response.xpath("//table[@class='a-normal a-spacing-micro']/tr[@class='a-spacing-small po-operating_system']/td[@class='a-span9']/span/text()").get()
-        cellular_technology = response.xpath("//table[@class='a-normal a-spacing-micro']/tr[@class='a-spacing-small po-cellular_technology']/td[@class='a-span9']/span/text()").get()
-        wireless_network_technology = response.xpath("//table[@class='a-normal a-spacing-micro']/tr[@class='a-spacing-small po-wireless_network_technology']/td[@class='a-span9']/span/text()").get()
-        about = ' '.join(response.xpath("//div[@id='feature-bullets']/ul/li/span/text()").getall()).strip()
-        
-        yield {
-            title,
-            link,
-            price if price else response.xpath("//table[@class='a-lineitem a-align-top']/tr/td[@class='a-span12']/span/span/text()").get(),
-            rating,
-            brand,
-            model_name,
-            operating_system,
-            cellular_technology,
-            wireless_network_technology,
-            about,
-        }
+        if not response.xpath("//span[contains(text(),'Currently unavailable.')]").get():
+            price = response.xpath("//span[@class='a-price aok-align-center reinventPricePriceToPayMargin priceToPay']/span/text()").get()
+            rating = response.xpath("//i[contains(@class,'a-icon a-icon-star')]/span/text()").get().split(' ')[0]
+            brand = response.xpath("//table[@class='a-normal a-spacing-micro']/tr[@class='a-spacing-small po-brand']/td[@class='a-span9']/span/text()").get()
+            model_name = response.xpath("//table[@class='a-normal a-spacing-micro']/tr[@class='a-spacing-small po-model_name']/td[@class='a-span9']/span/text()").get()
+            operating_system = response.xpath("//table[@class='a-normal a-spacing-micro']/tr[@class='a-spacing-small po-operating_system']/td[@class='a-span9']/span/text()").get()
+            cellular_technology = response.xpath("//table[@class='a-normal a-spacing-micro']/tr[@class='a-spacing-small po-cellular_technology']/td[@class='a-span9']/span/text()").get()
+            wireless_network_technology = response.xpath("//table[@class='a-normal a-spacing-micro']/tr[@class='a-spacing-small po-wireless_network_technology']/td[@class='a-span9']/span/text()").get()
+            about = ' '.join(response.xpath("//div[@id='feature-bullets']/ul/li/span/text()").getall()).strip()
+            
+            yield {
+                'title': title,
+                'link': link,
+                'price': price if price else response.xpath("//table[@class='a-lineitem a-align-top']/tr/td[@class='a-span12']/span/span/text()").get(),
+                'rating': rating,
+                'brand': brand,
+                'model_name': model_name,
+                'operating_system': operating_system,
+                'cellular_technology': cellular_technology,
+                'wireless_network_technology': wireless_network_technology,
+                'about': about,
+            }
+        else:
+            yield {
+                'link': link,
+                'title': title,
+            }
 
 
     def get_links_from_file(self, filename):
