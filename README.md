@@ -1,2 +1,2 @@
 # Amazon-Scraper
-Amazon 'Today's Deals' scraper using python Scrapy
+Amazon scraper using python Scrapy
