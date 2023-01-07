@@ -20,21 +20,42 @@ class PhoneSpider(scrapy.Spider):
     def __init__(self, name=None, **kwargs):
         super().__init__(name, **kwargs)
         self.input_urls = self.get_links_from_file('input/input links.txt')
+        self.headers = {'accept': 'text/html, */*; q=0.01',
+                        'accept-encoding': 'gzip, deflate, br',
+                        'accept-language': 'en-US,en;q=0.9,fa;q=0.8',
+                        'content-type': 'application/json',
+                        'device-memory': '4',
+                        'downlink': '0.15',
+                        'dpr': '1',
+                        'ect': 'slow-2g',
+                        'origin': 'https://www.amazon.com',
+                        'referer': 'https://www.google.com',
+                        'rtt': '3000',
+                        'sec-ch-device-memory': '4',
+                        'sec-ch-dpr': '1',
+                        'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108", "Microsoft Edge";v="108"',
+                        'sec-ch-ua-mobile': '?0',
+                        'sec-ch-ua-platform': '"Windows"',
+                        'sec-ch-viewport-width': '869',
+                        'sec-fetch-dest': 'empty',
+                        'sec-fetch-mode': 'cors',
+                        'sec-fetch-site': 'same-origin',
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.54', 'viewport-width': '869', 'x-requested-with': 'XMLHttpRequest'
+                    }        
 
-    
     def start_requests(self):
         for url in self.input_urls:
-            yield scrapy.Request(url, callback=self.parse)
+            yield scrapy.Request(url, callback=self.parse, headers=self.headers)
 
 
     def parse(self, response):
         product_links = response.xpath("//a[@class='a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal']/@href").getall()
         for link in product_links :
-            yield response.follow(link, callback=self.parse_product)
+            yield response.follow(link, callback=self.parse_product, headers=self.headers)
 
-        next_page = response.xpath("//a[@class='s-pagination-item s-pagination-next s-pagination-button s-pagination-separator']/@href").get()
-        while next_page:
-            yield response.follow(next_page, callback=self.parse)
+        next_page = response.xpath("//a[text()='Next']/@href").get()
+        if next_page:
+            yield scrapy.Request(response.urljoin(next_page), callback=self.parse, headers=self.headers)
 
 
     def parse_product(self, response):
