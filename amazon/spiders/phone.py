@@ -7,7 +7,7 @@ class PhoneSpider(scrapy.Spider):
     start_urls = ['http://amazon.com/']
 
     custom_settings = {
-        'CONCURRENT_REQUESTS' : 2,
+        'CONCURRENT_REQUESTS': 2,
         'DOWNLOAD_DELAY': 2,
         'RETRY_TIMES': 5,
         'FEED_URI': f'outputs/phones_{datetime.datetime.today().strftime("%d-%m-%Y")}.csv',

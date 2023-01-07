@@ -90,3 +90,15 @@ ROBOTSTXT_OBEY = False
 # Set settings whose default value is deprecated to a future-proof value
 REQUEST_FINGERPRINTER_IMPLEMENTATION = '2.7'
 TWISTED_REACTOR = 'twisted.internet.asyncioreactor.AsyncioSelectorReactor'
+
+
+SCRAPEOPS_API_KEY = '3ae7836a-6b06-45c6-a65b-0ed4dc9076a5'
+
+EXTENSIONS = {
+        'scrapeops_scrapy.extension.ScrapeOpsMonitor': 500, 
+        }
+
+DOWNLOADER_MIDDLEWARES = {
+        'scrapeops_scrapy.middleware.retry.RetryMiddleware': 550,
+        'scrapy.downloadermiddlewares.retry.RetryMiddleware': None,
+        }
